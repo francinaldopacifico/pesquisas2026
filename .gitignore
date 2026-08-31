@@ -1,0 +1,10 @@
+# CSVs brutos e ZIP (nao sobem para o repo, pesam)
+pesquisas_2026/
+pesq2026.zip
+*.csv
+
+# Nao ignorar o banco SQLite (o Streamlit precisa dele)
+!pesquisas.db
+
+__pycache__/
+*.pyc

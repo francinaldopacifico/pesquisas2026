@@ -36,21 +36,15 @@ def init_db():
     conn.commit()
     conn.close()
 
-# --- 2. DATASET REAL DO TSE ---
+# --- 2. FONTE: SQLite (metadados + resultados) ---
+
 @st.cache_data
 def carregar_metadados():
-    p = Path(__file__).parent / "pesquisas.csv"
-    df = pd.read_csv(p, dtype={"protocolo": str})
-    df["pesquisa_id"] = df["protocolo"].astype(str).str.strip()
-    df = df.rename(columns={
-        "uf": "uf",
-        "instituto": "instituto",
-        "cargo": "cargo",
-        "data_inicio": "datas",
-        "entrevistados": "amostra",
-        "municipio": "municipio",
-    })
-    # datas vem como DD/MM/AAAA já (no csv gerado). Mantém.
+    conn = sqlite3.connect(DB_PATH)
+    df = pd.read_sql("SELECT * FROM pesquisas_tse", conn)
+    conn.close()
+    df["pesquisa_id"] = df["pesquisa_id"].astype(str).str.strip()
+    df["amostra"] = df["amostra"].fillna(0).astype(int)
     return df
 
 # --- 3. FUNÇÕES DE BANCO ---
