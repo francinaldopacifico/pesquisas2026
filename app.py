@@ -172,10 +172,10 @@ if ADMIN:
                                               meta['uf'], fonte, candidatos)
                         if ok:
                             st.success("✅ Resultado salvo no GitHub!")
-                            st.rerun()
+                            st.toast("Salvo com sucesso!")
+                            dados_existentes = carregar_resultados(opcao)
                         else:
-                            st.error("❌ Não foi possível gravar no GitHub (sem token ou falha). "
-                                     "Tente novamente.")
+                            st.error("❌ Não foi possível gravar no GitHub. Tente novamente.")
                     except Exception as ex:
                         st.error(f"❌ Erro ao salvar: {ex}")
 
