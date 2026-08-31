@@ -120,11 +120,11 @@ if ADMIN:
         if busca.strip():
             b = busca.strip().lower()
             mask = (
-                df_meta["instituto"].astype(str).str.lower().str.contains(b)
-                | df_meta["protocolo"].astype(str).str.lower().str.contains(b)
-                | df_meta["uf"].astype(str).str.lower().str.contains(b)
-                | df_meta["cargo"].astype(str).str.lower().str.contains(b)
-                | df_meta["municipio"].astype(str).str.lower().str.contains(b)
+                df_meta["instituto"].astype(str).str.lower().str.contains(b, regex=False)
+                | df_meta["protocolo"].astype(str).str.lower().str.contains(b, regex=False)
+                | df_meta["uf"].astype(str).str.lower().str.contains(b, regex=False)
+                | df_meta["cargo"].astype(str).str.lower().str.contains(b, regex=False)
+                | df_meta["municipio"].astype(str).str.lower().str.contains(b, regex=False)
             )
             df_busca = df_meta[mask]
         if df_busca.empty:
@@ -221,10 +221,10 @@ else:
     cand_ids = set()
     if termo.strip():
         t = termo.strip().lower()
-        mask = (df_f["instituto"].astype(str).str.lower().str.contains(t)
-                | df_f["protocolo"].astype(str).str.lower().str.contains(t)
-                | df_f["cargo"].astype(str).str.lower().str.contains(t)
-                | df_f["municipio"].astype(str).str.lower().str.contains(t))
+        mask = (df_f["instituto"].astype(str).str.lower().str.contains(t, regex=False)
+                | df_f["protocolo"].astype(str).str.lower().str.contains(t, regex=False)
+                | df_f["cargo"].astype(str).str.lower().str.contains(t, regex=False)
+                | df_f["municipio"].astype(str).str.lower().str.contains(t, regex=False))
         df_f = df_f[mask]
         cand_ids = {r[0] for r in conn.execute(
             "SELECT pesquisa_id FROM candidatos_resultado WHERE lower(candidato) LIKE ?", (f"%{t}%",))}
