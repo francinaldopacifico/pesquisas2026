@@ -20,11 +20,32 @@ Fallback: se não houver secrets, usa 'resultados.json' local (só-voo, não per
 FILE = "resultados.json"
 
 
+def _secrets():
+    """Lê secrets do Streamlit se disponível (sem import em ambiente sem streamlit)."""
+    try:
+        import streamlit as st
+        return st.secrets
+    except Exception:
+        return {}
+
+
 def _repo():
+    try:
+        from streamlit import secrets as _s
+        if "GITHUB_REPO" in _s:
+            return _s["GITHUB_REPO"]
+    except Exception:
+        pass
     return os.environ.get("GITHUB_REPO") or "francinaldopacifico/pesquisas2026"
 
 
 def _token():
+    try:
+        from streamlit import secrets as _s
+        if "GITHUB_TOKEN" in _s:
+            return _s["GITHUB_TOKEN"]
+    except Exception:
+        pass
     return os.environ.get("GITHUB_TOKEN") or ""
 
 
