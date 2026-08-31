@@ -167,10 +167,17 @@ if ADMIN:
                                       value=(dados_existentes['metadados']['fonte_manual'] or "")
                                       if dados_existentes else "")
                 if st.button("💾 Salvar Resultado"):
-                    salvar_resultado(opcao, meta['instituto'], meta['cargo'], meta['datas'],
-                                     meta['uf'], fonte, candidatos)
-                    st.success("✅ Resultado salvo!")
-                    st.rerun()
+                    try:
+                        ok = salvar_resultado(opcao, meta['instituto'], meta['cargo'], meta['datas'],
+                                              meta['uf'], fonte, candidatos)
+                        if ok:
+                            st.success("✅ Resultado salvo no GitHub!")
+                            st.rerun()
+                        else:
+                            st.error("❌ Não foi possível gravar no GitHub (sem token ou falha). "
+                                     "Tente novamente.")
+                    except Exception as ex:
+                        st.error(f"❌ Erro ao salvar: {ex}")
 
     with tab2:
         st.header("Deletar resultado vinculado")
