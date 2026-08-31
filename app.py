@@ -143,9 +143,10 @@ if ADMIN:
 
             dados_existentes = carregar_resultados(opcao)
             st.subheader("Resultados por candidato")
+            n_default = len(dados_existentes['candidatos']) if dados_existentes else 4
+            n_default = max(1, min(15, n_default))
             n = st.number_input("Nº de candidatos", min_value=1, max_value=15,
-                                value=(len(dados_existentes['candidatos']) if dados_existentes else 4),
-                                step=1)
+                                value=n_default, step=1, key=f"n_cand_{opcao}")
             candidatos = []
             total = 0.0
             pre = (dados_existentes['candidatos']['candidato'].tolist(),
