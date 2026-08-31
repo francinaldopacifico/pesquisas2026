@@ -1,1 +1,12 @@
-{}
+{
+  "CE017252026": {
+    "instituto": "QUAEST PESQUISAS, CONSULTORIA E PROJETOS LTDA.",
+    "cargo": "Governador, Senador",
+    "data_pesquisa": "24/04/2026",
+    "uf": "CE",
+    "fonte_manual": "",
+    "candidatos": {
+      "elmano de freitas": 0.0
+    }
+  }
+}
