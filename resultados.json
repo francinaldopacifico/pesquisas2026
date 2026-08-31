@@ -1,0 +1,12 @@
+{
+  "CE00001": {
+    "instituto": "Quaest",
+    "cargo": "Governador",
+    "uf": "CE",
+    "fonte_manual": "Teste",
+    "candidatos": {
+      "A": 32.0,
+      "B": 28.0
+    }
+  }
+}
