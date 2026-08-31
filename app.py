@@ -111,7 +111,7 @@ ADMIN = senha == "admin123"  # Troque por senha segura
 if ADMIN:
     st.sidebar.success("✅ Modo ADMIN ativado")
     st.title("🛠️ Administração de Resultados")
-    tab1, tab2 = st.tabs(["➕ Inserir/Editar Resultado", "🗑️ Deletar Resultado", "📋 Metadados TSE"])
+    tab1, tab2, tab3 = st.tabs(["➕ Inserir/Editar Resultado", "🗑️ Deletar Resultado", "📋 Metadados TSE"])
 
     with tab1:
         st.header("Vincular resultado a uma pesquisa oficial")
