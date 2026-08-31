@@ -192,24 +192,33 @@ if ADMIN:
                      use_container_width=True, hide_index=True)
 
 else:
-    # --- MODO PÚBLICO ---
-    st.title("🗳️ Pesquisas Eleitorais → TSE 2026")
-    st.markdown("Pesquisas registradas no PesqEle (TSE). Quando o resultado por candidato estiver "
-                "disponível, ele é exibido. Caso contrário, apenas os metadados oficiais.")
+    # --- MODO PÚBLICO (foco Ceará) ---
+    st.title("🗳️ Pesquisas Eleitorais — Ceará · 2026")
+    st.markdown(
+        "Pesquisas registradas no PesqEle (TSE) para o Estado do Ceará — "
+        "todos os cargos das Eleições 2026. Quando o resultado por candidato "
+        "estiver disponível, ele é exibido; caso contrário, apenas os metadados oficiais."
+    )
 
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        uf_f = st.selectbox("UF:", ["Todas"] + sorted(df_meta["uf"].dropna().unique().tolist()))
-    with c2:
-        cargo_f = st.selectbox("Cargo:", ["Todos"] + sorted(df_meta["cargo"].dropna().unique().tolist()))
-    with c3:
-        termo = st.text_input("Busca (instituto/candidato/protocolo):")
+    # Foco no Ceará
+    df_ce = df_meta[df_meta["uf"] == "CE"].copy()
 
-    df_f = df_meta
-    if uf_f != "Todas":
-        df_f = df_f[df_f["uf"] == uf_f]
-    if cargo_f != "Todos":
-        df_f = df_f[df_f["cargo"] == cargo_f]
+    cargos_foco = ["Presidente", "Governador", "Senador", "Deputado Federal", "Deputado Estadual"]
+    aba = st.radio("Cargo:", ["Todos"] + cargos_foco, horizontal=True)
+
+    c1, c2 = st.columns([2, 3])
+    filtro_inst = c1.selectbox("Instituto:", ["Todos"] + sorted(df_ce["instituto"].dropna().unique().tolist()))
+    termo = c2.text_input("Busca (instituto/candidato/protocolo):")
+
+    df_f = df_ce
+    if aba != "Todos":
+        df_f = df_f[df_f["cargo"].astype(str).str.contains(aba, case=False, na=False)]
+    if filtro_inst != "Todos":
+        df_f = df_f[df_f["instituto"] == filtro_inst]
+
+    # Busca também por candidato nos resultados salvos
+    conn = sqlite3.connect(DB_PATH)
+    cand_ids = set()
     if termo.strip():
         t = termo.strip().lower()
         mask = (df_f["instituto"].astype(str).str.lower().str.contains(t)
@@ -217,25 +226,19 @@ else:
                 | df_f["cargo"].astype(str).str.lower().str.contains(t)
                 | df_f["municipio"].astype(str).str.lower().str.contains(t))
         df_f = df_f[mask]
-
-    # Filtra também por candidato nos resultados salvos
-    conn = sqlite3.connect(DB_PATH)
-    all_ids = [r[0] for r in conn.execute("SELECT pesquisa_id FROM resultados_pesquisas")]
-    cand_ids = set()
-    if termo.strip():
-        t = termo.strip().lower()
         cand_ids = {r[0] for r in conn.execute(
             "SELECT pesquisa_id FROM candidatos_resultado WHERE lower(candidato) LIKE ?", (f"%{t}%",))}
     conn.close()
     if cand_ids:
-        df_f = pd.concat([df_f, df_meta[df_meta['pesquisa_id'].isin(cand_ids)]]).drop_duplicates('pesquisa_id')
+        df_f = pd.concat([df_f, df_ce[df_ce['pesquisa_id'].isin(cand_ids)]]).drop_duplicates('pesquisa_id')
 
-    st.write(f"Mostrando **{len(df_f)}** pesquisas.")
+    df_f = df_f.sort_values("datas", ascending=False)
+    st.write(f"Mostrando **{len(df_f)}** pesquisa(s) no Ceará.")
 
     for _, row in df_f.iterrows():
         pid = row["pesquisa_id"]
         res = carregar_resultados(pid)
-        with st.expander(f"📋 {row['instituto']} | {row['cargo']} | UF {row['uf']} | coleta até {row['datas']}"):
+        with st.expander(f"📋 {row['instituto']} | {row['cargo']} | coleta até {row['datas']}"):
             col1, col2, col3, col4 = st.columns(4)
             with col1: st.metric("Instituto", row["instituto"])
             with col2: st.metric("Cargo", row["cargo"])

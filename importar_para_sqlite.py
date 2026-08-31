@@ -22,6 +22,35 @@ COLS = [
 ]
 
 
+def cargos_oficiais(c):
+    """Extrai a LISTA de cargos a partir do DS_CARGO composto do TSE.
+    Ex: 'Governador, Senador, Deputado Federal' -> ['Governador','Senador','Deputado Federal']"""
+    if not c or (isinstance(c, float) and pd.isna(c)):
+        return []
+    lista = []
+    for parte in str(c).split(","):
+        parte = parte.strip()
+        if not parte:
+            continue
+        p = parte.lower()
+        nome = {
+            "presidente": "Presidente",
+            "vice-presidente": "Vice-Presidente",
+            "governador": "Governador",
+            "vice-governador": "Vice-Governador",
+            "senador": "Senador",
+            "deputado federal": "Deputado Federal",
+            "deputado estadual": "Deputado Estadual",
+            "deputado distrital": "Deputado Distrital",
+            "prefeito": "Prefeito",
+            "vice-prefeito": "Vice-Prefeito",
+            "vereador": "Vereador",
+        }.get(p, parte.title())
+        lista.append(nome)
+    return lista
+
+
+
 def normalizar_cargo(c):
     if not c or (isinstance(c, float) and pd.isna(c)):
         return ""
@@ -100,7 +129,8 @@ def importar():
             if not proto:
                 continue
             inst = str(r["NM_EMPRESA"]).strip() if pd.notna(r.get("NM_EMPRESA")) else ""
-            cargo = normalizar_cargo(r.get("DS_CARGO"))
+            cargos = cargos_oficiais(r.get("DS_CARGO"))
+            cargo = ", ".join(cargos) if cargos else ""
             mun = str(r["NM_UE"]).strip() if pd.notna(r.get("NM_UE")) else ""
             qtd = r["QT_ENTREVISTADO"] if pd.notna(r.get("QT_ENTREVISTADO")) else 0
             try:
