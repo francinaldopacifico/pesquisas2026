@@ -47,53 +47,50 @@ def carregar_metadados():
     df["amostra"] = df["amostra"].fillna(0).astype(int)
     return df
 
-# --- 3. FUNÇÕES DE BANCO ---
+# --- 3. FUNÇÕES DE RESULTADOS (persistência via GitHub JSON) ---
+import storage
+
 def salvar_resultado(pesquisa_id, instituto, cargo, data_pesquisa, uf, fonte, candidatos):
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
-    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    cur.execute("""
-    INSERT INTO resultados_pesquisas
-        (pesquisa_id, instituto, cargo, data_pesquisa, uf, fonte_manual, criado_em, atualizado_em)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ON CONFLICT(pesquisa_id) DO UPDATE SET
-        instituto=excluded.instituto,
-        cargo=excluded.cargo,
-        data_pesquisa=excluded.data_pesquisa,
-        uf=excluded.uf,
-        fonte_manual=excluded.fonte_manual,
-        atualizado_em=excluded.atualizado_em
-    """, (pesquisa_id, instituto, cargo, data_pesquisa, uf, fonte, now, now))
-    cur.execute("DELETE FROM candidatos_resultado WHERE pesquisa_id = ?", (pesquisa_id,))
-    for cand, pct in candidatos:
-        cur.execute("""
-        INSERT INTO candidatos_resultado (pesquisa_id, candidato, percentual)
-        VALUES (?, ?, ?)
-        """, (pesquisa_id, cand, pct))
-    conn.commit()
-    conn.close()
+    dados = storage.carregar_resultados_json()
+    dados[pesquisa_id] = {
+        "instituto": instituto,
+        "cargo": cargo,
+        "data_pesquisa": data_pesquisa,
+        "uf": uf,
+        "fonte_manual": fonte or "",
+        "candidatos": {cand: float(pct) for cand, pct in candidatos},
+    }
+    return storage.salvar_resultados_json(dados)
 
 def carregar_resultados(pesquisa_id):
-    conn = sqlite3.connect(DB_PATH)
-    df_main = pd.read_sql("SELECT * FROM resultados_pesquisas WHERE pesquisa_id = ?",
-                          conn, params=(pesquisa_id,))
-    if df_main.empty:
-        conn.close()
+    dados = storage.carregar_resultados_json()
+    reg = dados.get(pesquisa_id)
+    if not reg:
         return None
-    df_cand = pd.read_sql("""
-        SELECT candidato, percentual FROM candidatos_resultado
-        WHERE pesquisa_id = ? ORDER BY percentual DESC
-    """, conn, params=(pesquisa_id,))
-    conn.close()
-    return {'metadados': df_main.iloc[0], 'candidatos': df_cand}
+    cands = reg.get("candidatos", {})
+    df_cand = pd.DataFrame(
+        [{"candidato": k, "percentual": v} for k, v in cands.items()]
+    ).sort_values("percentual", ascending=False) if cands else pd.DataFrame(columns=["candidato", "percentual"])
+    return {
+        "metadados": pd.Series({
+            "instituto": reg.get("instituto", ""),
+            "cargo": reg.get("cargo", ""),
+            "data_pesquisa": reg.get("data_pesquisa", ""),
+            "uf": reg.get("uf", ""),
+            "fonte_manual": reg.get("fonte_manual", ""),
+        }),
+        "candidatos": df_cand,
+    }
 
 def deletar_resultado(pesquisa_id):
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
-    cur.execute("DELETE FROM resultados_pesquisas WHERE pesquisa_id = ?", (pesquisa_id,))
-    cur.execute("DELETE FROM candidatos_resultado WHERE pesquisa_id = ?", (pesquisa_id,))
-    conn.commit()
-    conn.close()
+    dados = storage.carregar_resultados_json()
+    if pesquisa_id in dados:
+        del dados[pesquisa_id]
+        return storage.salvar_resultados_json(dados)
+    return False
+
+def ids_com_resultado():
+    return set(storage.carregar_resultados_json().keys())
 
 # --- 4. INTERFACE ---
 init_db()
@@ -115,18 +112,18 @@ if ADMIN:
 
     with tab1:
         st.header("Vincular resultado a uma pesquisa oficial")
-        busca = st.text_input("Buscar pesquisa (instituto/protocolo/UF/cargo):")
-        df_busca = df_meta
+        busca = st.text_input("Buscar pesquisa (instituto/protocolo/cargo):")
+        df_busca = df_meta[df_meta["uf"] == "CE"].copy()
         if busca.strip():
             b = busca.strip().lower()
             mask = (
-                df_meta["instituto"].astype(str).str.lower().str.contains(b, regex=False)
-                | df_meta["protocolo"].astype(str).str.lower().str.contains(b, regex=False)
-                | df_meta["uf"].astype(str).str.lower().str.contains(b, regex=False)
-                | df_meta["cargo"].astype(str).str.lower().str.contains(b, regex=False)
-                | df_meta["municipio"].astype(str).str.lower().str.contains(b, regex=False)
+                df_busca["instituto"].astype(str).str.lower().str.contains(b, regex=False)
+                | df_busca["protocolo"].astype(str).str.lower().str.contains(b, regex=False)
+                | df_busca["uf"].astype(str).str.lower().str.contains(b, regex=False)
+                | df_busca["cargo"].astype(str).str.lower().str.contains(b, regex=False)
+                | df_busca["municipio"].astype(str).str.lower().str.contains(b, regex=False)
             )
-            df_busca = df_meta[mask]
+            df_busca = df_busca[mask]
         if df_busca.empty:
             st.info("Nenhuma pesquisa encontrada.")
         else:
@@ -161,7 +158,9 @@ if ADMIN:
                 if cand.strip():
                     candidatos.append((cand.strip(), pct))
                     total += pct
-            if total > 100.1:
+            if not candidatos:
+                st.warning("⚠️ Preencha ao menos um candidato com nome para poder salvar.")
+            elif total > 100.1:
                 st.error(f"⚠️ Soma {total:.1f}% — deve ser ≤ 100%")
             else:
                 fonte = st.text_input("Fonte manual (ex: Folha de S.Paulo, g1)",
@@ -175,9 +174,7 @@ if ADMIN:
 
     with tab2:
         st.header("Deletar resultado vinculado")
-        _conn = sqlite3.connect(DB_PATH)
-        ids = [r[0] for r in _conn.execute("SELECT pesquisa_id FROM resultados_pesquisas")]
-        _conn.close()
+        ids = sorted(ids_com_resultado())
         if not ids:
             st.info("Nenhum resultado salvo ainda.")
         else:
@@ -218,7 +215,6 @@ else:
         df_f = df_f[df_f["instituto"] == filtro_inst]
 
     # Busca também por candidato nos resultados salvos
-    conn = sqlite3.connect(DB_PATH)
     cand_ids = set()
     if termo.strip():
         t = termo.strip().lower()
@@ -227,9 +223,10 @@ else:
                 | df_f["cargo"].astype(str).str.lower().str.contains(t, regex=False)
                 | df_f["municipio"].astype(str).str.lower().str.contains(t, regex=False))
         df_f = df_f[mask]
-        cand_ids = {r[0] for r in conn.execute(
-            "SELECT pesquisa_id FROM candidatos_resultado WHERE lower(candidato) LIKE ?", (f"%{t}%",))}
-    conn.close()
+        for pid, reg in storage.carregar_resultados_json().items():
+            for cand in (reg.get("candidatos") or {}):
+                if t in str(cand).lower():
+                    cand_ids.add(pid)
     if cand_ids:
         df_f = pd.concat([df_f, df_ce[df_ce['pesquisa_id'].isin(cand_ids)]]).drop_duplicates('pesquisa_id')
 
