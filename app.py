@@ -260,3 +260,9 @@ else:
 st.sidebar.divider()
 st.sidebar.caption("🔒 Admin: senha 'admin123' (troque por segura)")
 st.sidebar.caption("Metadados: PesqEle TSE 2026 (oficiais)")
+try:
+    _nres = len(ids_com_resultado())
+    _tok = "✅" if storage._token() else "❌ sem token"
+    st.sidebar.caption(f"Resultados salvos: {_nres} | GitHub: {_tok}")
+except Exception as _e:
+    st.sidebar.caption(f"Status: {_e}")
