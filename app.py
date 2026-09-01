@@ -286,16 +286,6 @@ else:
                     df_tab.columns = ["Candidato", "%"]
                     df_tab["%"] = df_tab["%"].astype(float).map(lambda v: f"{v:.1f}".replace(".", ","))
                     st.table(df_tab)
-                    # Gráfico de barras (opcional)
-                    try:
-                        fig, ax = plt.subplots(figsize=(6, max(2, 0.4 * len(cand))))
-                        ax.barh(cand["candidato"], cand["percentual"].astype(float), color="#4C78A8")
-                        ax.set_xlabel("Percentual (%)")
-                        ax.set_xlim(0, 100)
-                        ax.invert_yaxis()
-                        st.pyplot(fig)
-                    except Exception:
-                        pass
                 fonte = res["metadados"]["fonte_manual"]
                 if fonte:
                     st.caption(f"Fonte dos resultados: {fonte}")
