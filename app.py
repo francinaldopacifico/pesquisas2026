@@ -277,6 +277,31 @@ else:
         "estiver disponível, ele é exibido; caso contrário, apenas os metadados oficiais."
     )
 
+    # --- ALERTA SEJA PREMIUM (aparece ao abrir o app) ---
+    if "alerta_premium_fechado" not in st.session_state:
+        st.session_state["alerta_premium_fechado"] = False
+    if not st.session_state["alerta_premium_fechado"]:
+        st.markdown("""
+        <div style="background:linear-gradient(135deg,#FFD700,#B8860B);padding:18px;border-radius:14px;text-align:center;margin-bottom:12px;">
+          <h2 style="color:#3c2f00;margin:0;">💎 SEJA PREMIUM</h2>
+          <p style="color:#3c2f00;margin:8px 0 0;font-size:15px;">
+            Tenha acesso completo às <b>Eleições 2026</b>:
+          </p>
+          <p style="color:#3c2f00;margin:6px 0 0;font-size:14px;text-align:left;display:inline-block;">
+            ✅ Percentuais reais de todas as pesquisas<br>
+            ✅ Gráficos de evolução da intenção de voto<br>
+            ✅ Perfil do eleitorado (5.757 municípios)<br>
+            ✅ Análises e relatórios exclusivos
+          </p>
+          <p style="color:#3c2f00;margin:10px 0 0;font-size:17px;font-weight:bold;">
+            📲 WhatsApp: 85991935958
+          </p>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("✖ Fechar", key="fechar_alerta"):
+            st.session_state["alerta_premium_fechado"] = True
+            st.rerun()
+
     tabPublico, tabPremium = st.tabs(["📊 Pesquisas", "💎 Premium"])
 
     with tabPublico:
