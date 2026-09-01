@@ -255,8 +255,7 @@ else:
     for _, row in df_f.iterrows():
         pid = row["pesquisa_id"]
         res = carregar_resultados(pid)
-        _debug = f" [debug pid={pid} res={0 if res is None else len(res['candidatos'])}]"
-        with st.expander(f"📋 {row['instituto']} | {row['cargo']} | coleta até {row['datas']}{_debug}"):
+        with st.expander(f"📋 {row['instituto']} | {row['cargo']} | coleta até {row['datas']}"):
             col1, col2, col3, col4 = st.columns(4)
             with col1: st.metric("Instituto", row["instituto"])
             with col2: st.metric("Cargo", row["cargo"])
