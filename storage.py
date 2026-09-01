@@ -55,7 +55,14 @@ def _base_url():
 
 def carregar_resultados_json():
     """Retorna dict {pesquisa_id: {candidato: pct, ...}}."""
-    # 1) Tenta do GitHub (persistente)
+    # 1) Tenta o arquivo local (copiado do repo pelo Streamlit) — mais confiável
+    p = Path(__file__).parent / FILE
+    if p.exists():
+        try:
+            return json.loads(p.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    # 2) Fallback: GitHub (persistente)
     token = _token()
     if token:
         try:
@@ -74,13 +81,6 @@ def carregar_resultados_json():
             print("[gh] erro ao ler:", e.code)
         except Exception as e:
             print("[gh] erro ao ler:", e)
-    # 2) Fallback local
-    p = Path(__file__).parent / FILE
-    if p.exists():
-        try:
-            return json.loads(p.read_text(encoding="utf-8"))
-        except Exception:
-            return {}
     return {}
 
 
