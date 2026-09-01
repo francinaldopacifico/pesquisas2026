@@ -42,5 +42,23 @@
       "Nulo/Branco": 4.0,
       "Não sabe/Não respondeu": 5.0
     }
+  },
+  "CE092772026": {
+    "instituto": "QUAEST PESQUISAS, CONSULTORIA E PROJETOS LTDA.",
+    "cargo": "Governador, Senador",
+    "data_pesquisa": "24/07/2026",
+    "uf": "CE",
+    "fonte_manual": "Genial/Quaest — Gazeta do Povo (30/07/2026)",
+    "candidatos": {
+      "Ciro Gomes": 43.0,
+      "Elmano de Freitas": 33.0,
+      "Eduardo Girão": 3.0,
+      "Jarir Pereira": 1.0,
+      "Hugo Leonardo": 0.0,
+      "Serley Leal": 0.0,
+      "Zé Batista": 0.0,
+      "Branco/Nulo/Não vai votar": 7.0,
+      "Indecisos": 13.0
+    }
   }
 }
