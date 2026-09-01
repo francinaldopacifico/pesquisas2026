@@ -151,12 +151,13 @@ def _premium_ok(senha_digitada):
         senhas = ["premium123"]
     return senha_digitada in senhas
 
-st.sidebar.title("🔒 Painel Admin")
-senha = st.sidebar.text_input("Senha do admin", type="password")
-ADMIN = senha == _admin_senha()
+with st.sidebar.expander("🔒 Painel Admin (restrito)"):
+    senha = st.text_input("Senha do admin", type="password")
+    ADMIN = senha == _admin_senha()
+    if ADMIN:
+        st.success("✅ Modo ADMIN ativado")
 
 if ADMIN:
-    st.sidebar.success("✅ Modo ADMIN ativado")
     st.title("🛠️ Administração de Resultados")
     tab1, tab2, tab3 = st.tabs(["➕ Inserir/Editar Resultado", "🗑️ Deletar Resultado", "📋 Metadados TSE"])
 
@@ -402,13 +403,3 @@ else:
                 "- 📊 Relatórios detalhados\n\n"
                 "**Para contratar, fale com o comercial.**"
             )
-
-st.sidebar.divider()
-st.sidebar.caption("🔒 Admin: senha configurada (secret; padrão admin123)")
-st.sidebar.caption("Metadados: PesqEle TSE 2026 (oficiais)")
-try:
-    _nres = len(ids_com_resultado())
-    _tok = "✅" if storage._token() else "❌ sem token"
-    st.sidebar.caption(f"Resultados salvos: {_nres} | GitHub: {_tok}")
-except Exception as _e:
-    st.sidebar.caption(f"Status: {_e}")
