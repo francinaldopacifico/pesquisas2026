@@ -140,14 +140,24 @@ if ADMIN:
 
             dados_existentes = carregar_resultados(opcao)
             st.subheader("Resultados por candidato")
-            n_default = len(dados_existentes['candidatos']) if dados_existentes else 4
+            if dados_existentes:
+                n_default = len(dados_existentes['candidatos'])
+                pre = (dados_existentes['candidatos']['candidato'].tolist(),
+                       dados_existentes['candidatos']['percentual'].tolist())
+            else:
+                import candidatos_ce
+                sugestoes = candidatos_ce.sugerir_candidatos(meta['cargo'])
+                if sugestoes:
+                    n_default = len(sugestoes)
+                    pre = (sugestoes, [0.0] * len(sugestoes))
+                else:
+                    n_default = 4
+                    pre = (["", "", "", ""], [0.0, 0.0, 0.0, 0.0])
             n_default = max(1, min(15, n_default))
             n = st.number_input("Nº de candidatos", min_value=1, max_value=15,
                                 value=n_default, step=1, key=f"n_cand_{opcao}")
             candidatos = []
             total = 0.0
-            pre = (dados_existentes['candidatos']['candidato'].tolist(),
-                   dados_existentes['candidatos']['percentual'].tolist()) if dados_existentes else (["", "", "", ""], [0.0, 0.0, 0.0, 0.0])
             for i in range(int(n)):
                 c1, c2 = st.columns([3, 1])
                 nome_default = pre[0][i] if i < len(pre[0]) else ""
