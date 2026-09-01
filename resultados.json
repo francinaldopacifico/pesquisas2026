@@ -4,9 +4,14 @@
     "cargo": "Governador, Senador",
     "data_pesquisa": "24/04/2026",
     "uf": "CE",
-    "fonte_manual": "",
+    "fonte_manual": "Genial/Quaest — Wikipédia (24-28/04)",
     "candidatos": {
-      "elmano de freitas": 0.0
+      "Ciro Gomes": 41.0,
+      "Elmano de Freitas": 32.0,
+      "Eduardo Girão": 4.0,
+      "Jarir Pereira": 1.0,
+      "Zé Batista": 0.0,
+      "Indecisos/Branco": 22.0
     }
   },
   "CE056822026": {
@@ -14,17 +19,15 @@
     "cargo": "Governador, Senador",
     "data_pesquisa": "13/07/2026",
     "uf": "CE",
-    "fonte_manual": "",
+    "fonte_manual": "RealTime Big Data — Wikipédia (13-14/07)",
     "candidatos": {
-      "Elmano de Freitas": 0.0,
-      "Capitão Wagner": 0.0,
-      "Eugênio Ronaldo": 0.0,
-      "Suname do Belém": 0.0,
-      "Roberto Cláudio": 0.0,
-      "Chico Lopes": 0.0,
-      "Cid Gomes": 0.0,
-      "Camilo Santana": 0.0,
-      "Roberto Pessoa": 0.0
+      "Ciro Gomes": 40.0,
+      "Elmano de Freitas": 44.0,
+      "Eduardo Girão": 7.0,
+      "Jarir Pereira": 1.0,
+      "Zé Batista": 0.0,
+      "Outros": 2.0,
+      "Indecisos/Branco": 6.0
     }
   },
   "CE082232026": {
@@ -77,6 +80,229 @@
       "Zé Batista": 0.0,
       "Brancos/Nulos": 7.0,
       "Não sabe": 4.0
+    }
+  },
+  "CE079252026": {
+    "instituto": "DATAFOLHA INSTITUTO DE PESQUISAS LTDA.",
+    "cargo": "Governador, Senador",
+    "data_pesquisa": "16/03/2026",
+    "uf": "CE",
+    "fonte_manual": "Datafolha — 13/08 (comparativo março)",
+    "candidatos": {
+      "Ciro Gomes": 47.0,
+      "Elmano de Freitas": 32.0,
+      "Brancos/Nulos": 0.0,
+      "Não sabe": 0.0
+    }
+  },
+  "CE057392026": {
+    "instituto": "INTELIGENCIA EM PESQUISA E CONSULTORIA LTDA",
+    "cargo": "Governador, Senador",
+    "data_pesquisa": "22/07/2026",
+    "uf": "CE",
+    "fonte_manual": "Ipsos/Ipec — Wikipédia (22/07)",
+    "candidatos": {
+      "Ciro Gomes": 43.0,
+      "Elmano de Freitas": 31.0,
+      "Eduardo Girão": 6.0,
+      "Jarir Pereira": 1.0,
+      "Zé Batista": 1.0,
+      "Outros": 4.0,
+      "Indecisos/Branco": 15.0
+    }
+  },
+  "CE080262026": {
+    "instituto": "INSTITUTO DATATRENDS LTDA",
+    "cargo": "Governador, Senador",
+    "data_pesquisa": "23/06/2026",
+    "uf": "CE",
+    "fonte_manual": "DataTrends — Wikipédia (23-25/06)",
+    "candidatos": {
+      "Ciro Gomes": 44.0,
+      "Elmano de Freitas": 39.0,
+      "Eduardo Girão": 4.0,
+      "Jarir Pereira": 1.0,
+      "Outros": 2.0,
+      "Indecisos/Branco": 9.0
+    }
+  },
+  "CE034652026": {
+    "instituto": "ATLASINTEL TECNOLOGIA DE DADOS LTDA",
+    "cargo": "Governador, Senador",
+    "data_pesquisa": "09/06/2026",
+    "uf": "CE",
+    "fonte_manual": "AtlasIntel/Focus — Wikipédia (9-14/06)",
+    "candidatos": {
+      "Ciro Gomes": 45.8,
+      "Elmano de Freitas": 44.8,
+      "Eduardo Girão": 4.8,
+      "Jarir Pereira": 0.1,
+      "Zé Batista": 1.0,
+      "Outros": 4.0,
+      "Indecisos/Branco": 0.6
+    }
+  },
+  "CE048282026": {
+    "instituto": "INTELIGENCIA EM PESQUISA E CONSULTORIA LTDA",
+    "cargo": "Governador, Senador",
+    "data_pesquisa": "28/05/2026",
+    "uf": "CE",
+    "fonte_manual": "Ipsos/Ipec — Wikipédia (28/05-01/06)",
+    "candidatos": {
+      "Ciro Gomes": 44.0,
+      "Elmano de Freitas": 33.0,
+      "Eduardo Girão": 4.0,
+      "Jarir Pereira": 1.0,
+      "Zé Batista": 1.0,
+      "Outros": 2.0,
+      "Indecisos/Branco": 15.0
+    }
+  },
+  "CE004182026": {
+    "instituto": "INSTITUTO VERITA LTDA",
+    "cargo": "Governador, Senador",
+    "data_pesquisa": "22/05/2026",
+    "uf": "CE",
+    "fonte_manual": "Veritá — Wikipédia (22-26/05)",
+    "candidatos": {
+      "Ciro Gomes": 45.0,
+      "Elmano de Freitas": 38.8,
+      "Eduardo Girão": 3.4,
+      "Jarir Pereira": 2.0,
+      "Indecisos/Branco": 10.7
+    }
+  },
+  "CE035062026": {
+    "instituto": "REAL TIME MIDIA LTDA",
+    "cargo": "Governador, Senador",
+    "data_pesquisa": "18/05/2026",
+    "uf": "CE",
+    "fonte_manual": "RealTime Big Data — Wikipédia (18-19/05)",
+    "candidatos": {
+      "Ciro Gomes": 40.0,
+      "Elmano de Freitas": 43.0,
+      "Eduardo Girão": 8.0,
+      "Jarir Pereira": 2.0,
+      "Zé Batista": 0.0,
+      "Outros": 1.0,
+      "Indecisos/Branco": 6.0
+    }
+  },
+  "CE076452026": {
+    "instituto": "REAL TIME MIDIA LTDA",
+    "cargo": "Governador, Senador",
+    "data_pesquisa": "27/03/2026",
+    "uf": "CE",
+    "fonte_manual": "RealTime Big Data — Wikipédia (27-28/03)",
+    "candidatos": {
+      "Ciro Gomes": 39.0,
+      "Elmano de Freitas": 42.0,
+      "Eduardo Girão": 13.0,
+      "Jarir Pereira": 0.0,
+      "Indecisos/Branco": 6.0
+    }
+  },
+  "CE064772026": {
+    "instituto": "INSTITUTO VERITA LTDA",
+    "cargo": "Governador, Senador",
+    "data_pesquisa": "18/03/2026",
+    "uf": "CE",
+    "fonte_manual": "Veritá — Wikipédia (18-24/03)",
+    "candidatos": {
+      "Ciro Gomes": 47.3,
+      "Elmano de Freitas": 38.8,
+      "Eduardo Girão": 12.5,
+      "Jarir Pereira": 1.3,
+      "Indecisos/Branco": 12.9
+    }
+  },
+  "CE088762026": {
+    "instituto": "ATLASINTEL TECNOLOGIA DE DADOS LTDA",
+    "cargo": "Governador, Senador",
+    "data_pesquisa": "25/03/2026",
+    "uf": "CE",
+    "fonte_manual": "AtlasIntel/Focus — Wikipédia (25-30/03)",
+    "candidatos": {
+      "Ciro Gomes": 46.2,
+      "Elmano de Freitas": 42.6,
+      "Roberto Cláudio": 5.3,
+      "Jarir Pereira": 1.0,
+      "Zé Batista": 0.0,
+      "Indecisos/Branco": 4.9
+    }
+  },
+  "CE001512026": {
+    "instituto": "INSTITUTO PARANA DE PESQUISAS E ANALISE DE CONSUMIDOR LTDA",
+    "cargo": "Governador, Senador",
+    "data_pesquisa": "26/03/2026",
+    "uf": "CE",
+    "fonte_manual": "Paraná Pesquisas — Wikipédia (27-30/03)",
+    "candidatos": {
+      "Ciro Gomes": 46.6,
+      "Elmano de Freitas": 33.9,
+      "Roberto Cláudio": 6.1,
+      "Jarir Pereira": 0.5,
+      "Zé Batista": 0.5,
+      "Indecisos/Branco": 11.9
+    }
+  },
+  "CE051392026": {
+    "instituto": "INSTITUTO PARANA DE PESQUISAS E ANALISE DE CONSUMIDOR LTDA",
+    "cargo": "Governador, Senador",
+    "data_pesquisa": "17/01/2026",
+    "uf": "CE",
+    "fonte_manual": "Paraná Pesquisas — Wikipédia (17-21/01)",
+    "candidatos": {
+      "Ciro Gomes": 44.8,
+      "Elmano de Freitas": 34.2,
+      "Roberto Cláudio": 7.9,
+      "Jarir Pereira": 1.6,
+      "Indecisos/Branco": 11.6
+    }
+  },
+  "CE040072026": {
+    "instituto": "INSTITUTO VERITA LTDA",
+    "cargo": "Governador, Senador",
+    "data_pesquisa": "23/04/2026",
+    "uf": "CE",
+    "fonte_manual": "Veritá — Wikipédia (23-27/04)",
+    "candidatos": {
+      "Ciro Gomes": 54.2,
+      "Elmano de Freitas": 35.2,
+      "Eduardo Girão": 9.5,
+      "Jarir Pereira": 0.7,
+      "Zé Batista": 0.3
+    }
+  },
+  "CE027772026": {
+    "instituto": "ATLASINTEL TECNOLOGIA DE DADOS LTDA",
+    "cargo": "Governador, Senador",
+    "data_pesquisa": "06/08/2026",
+    "uf": "CE",
+    "fonte_manual": "AtlasIntel/Focus — Wikipédia (6-11/08)",
+    "candidatos": {
+      "Ciro Gomes": 49.3,
+      "Elmano de Freitas": 44.6,
+      "Delegado Huggo": 2.8,
+      "Zé Batista": 0.0,
+      "Outros": 0.8,
+      "Indecisos/Branco": 2.5
+    }
+  },
+  "CE001952026": {
+    "instituto": "INTELIGENCIA EM PESQUISA E CONSULTORIA LTDA",
+    "cargo": "Governador, Senador",
+    "data_pesquisa": "13/08/2026",
+    "uf": "CE",
+    "fonte_manual": "Ipsos/Ipec — Wikipédia (17-18/08)",
+    "candidatos": {
+      "Ciro Gomes": 43.0,
+      "Elmano de Freitas": 35.0,
+      "Vera Lúcia": 2.0,
+      "Delegado Huggo": 3.0,
+      "Zé Batista": 1.0,
+      "Outros": 1.0,
+      "Indecisos/Branco": 15.0
     }
   }
 }
