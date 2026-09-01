@@ -238,6 +238,7 @@ else:
 
     # Foco no Ceará
     df_ce = df_meta[df_meta["uf"] == "CE"].copy()
+    result_ids = ids_com_resultado()
 
     cargos_foco = ["Presidente", "Governador", "Senador", "Deputado Federal", "Deputado Estadual"]
     aba = st.radio("Cargo:", ["Todos"] + cargos_foco, horizontal=True)
@@ -251,6 +252,10 @@ else:
         df_f = df_f[df_f["cargo"].astype(str).str.contains(aba, case=False, na=False)]
     if filtro_inst != "Todos":
         df_f = df_f[df_f["instituto"] == filtro_inst]
+
+    # No "Todos" (sem busca/filtro), mostra só pesquisas COM resultado real
+    if aba == "Todos" and filtro_inst == "Todos" and not termo.strip():
+        df_f = df_f[df_f["pesquisa_id"].isin(result_ids)]
 
     # Busca também por candidato nos resultados salvos
     cand_ids = set()
