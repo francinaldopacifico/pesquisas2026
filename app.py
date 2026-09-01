@@ -112,6 +112,17 @@ if ADMIN:
 
     with tab1:
         st.header("Vincular resultado a uma pesquisa oficial")
+        with st.expander("📖 Como usar (guia rápido)"):
+            st.markdown("""
+1. **Busque** o instituto (ex.: `real time`, `quaest`) ou o protocolo.
+2. **Selecione** a pesquisa — os candidatos aparecem preenchidos.
+3. **Digite o % real** de cada candidato (soma ≤ 100).
+4. Preencha a **fonte** (ex.: g1, site do instituto).
+5. Clique **💾 Salvar Resultado** → aparece "✅ Resultado salvo no GitHub!".
+
+Para **atualizar**: selecione a mesma pesquisa, ajuste os % e salve de novo (substitui).
+Para **ver no público**: apague a senha no menu lateral — a pesquisa com resultado abre expandida com tabela + gráfico.
+""")
         busca = st.text_input("Buscar pesquisa (instituto/protocolo/cargo):")
         df_busca = df_meta[df_meta["uf"] == "CE"].copy()
         if busca.strip():
