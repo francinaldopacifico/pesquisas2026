@@ -278,13 +278,20 @@ else:
             with col4: st.metric("Amostra", f"{row['amostra']:,}".replace(",", "."))
             if res is not None:
                 st.success("📊 Resultado disponível")
-                st.dataframe(res["candidatos"], use_container_width=True, hide_index=True)
-                fig, ax = plt.subplots(figsize=(6, max(2, 0.4 * len(res['candidatos']))))
-                ax.barh(res["candidatos"]["candidato"], res["candidatos"]["percentual"], color="#4C78A8")
-                ax.set_xlabel("Percentual (%)")
-                ax.set_xlim(0, 100)
-                ax.invert_yaxis()
-                st.pyplot(fig)
+                cand = res["candidatos"]
+                if cand.empty:
+                    st.warning("Sem candidatos salvos.")
+                else:
+                    df_tab = cand.copy()
+                    df_tab.columns = ["Candidato", "%"]
+                    df_tab["%"] = df_tab["%"].astype(float).round(1)
+                    st.table(df_tab)
+                    fig, ax = plt.subplots(figsize=(6, max(2, 0.4 * len(cand))))
+                    ax.barh(cand["candidato"], cand["percentual"].astype(float), color="#4C78A8")
+                    ax.set_xlabel("Percentual (%)")
+                    ax.set_xlim(0, 100)
+                    ax.invert_yaxis()
+                    st.pyplot(fig)
                 fonte = res["metadados"]["fonte_manual"]
                 if fonte:
                     st.caption(f"Fonte dos resultados: {fonte}")
