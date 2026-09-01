@@ -247,7 +247,9 @@ else:
     if cand_ids:
         df_f = pd.concat([df_f, df_ce[df_ce['pesquisa_id'].isin(cand_ids)]]).drop_duplicates('pesquisa_id')
 
-    df_f = df_f.sort_values("datas", ascending=False)
+    df_f = df_f.copy()
+    df_f["_dt"] = pd.to_datetime(df_f["datas"], format="%d/%m/%Y", errors="coerce")
+    df_f = df_f.sort_values("_dt", ascending=False).drop(columns=["_dt"])
     st.write(f"Mostrando **{len(df_f)}** pesquisa(s) no Ceará.")
 
     for _, row in df_f.iterrows():
