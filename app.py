@@ -283,9 +283,10 @@ else:
                     st.warning("Sem candidatos salvos.")
                 else:
                     df_tab = cand.copy()
+                    df_tab = df_tab.reset_index(drop=True)
                     df_tab.columns = ["Candidato", "%"]
                     df_tab["%"] = df_tab["%"].astype(float).map(lambda v: f"{v:.1f}".replace(".", ","))
-                    st.table(df_tab)
+                    st.table(df_tab.style.hide(axis="index"))
                 fonte = res["metadados"]["fonte_manual"]
                 if fonte:
                     st.caption(f"Fonte dos resultados: {fonte}")
