@@ -101,9 +101,19 @@ df_meta = carregar_metadados()
 df_meta["amostra"] = df_meta["amostra"].fillna(0).astype(int)
 
 # --- ADMIN (senha) ---
+def _admin_senha():
+    try:
+        from streamlit import secrets as _s
+        if "ADMIN_SENHA" in _s:
+            return _s["ADMIN_SENHA"]
+    except Exception:
+        pass
+    import os
+    return os.environ.get("ADMIN_SENHA") or "admin123"
+
 st.sidebar.title("🔒 Painel Admin")
 senha = st.sidebar.text_input("Senha do admin", type="password")
-ADMIN = senha == "admin123"  # Troque por senha segura
+ADMIN = senha == _admin_senha()
 
 if ADMIN:
     st.sidebar.success("✅ Modo ADMIN ativado")
@@ -294,7 +304,7 @@ else:
                 st.warning("⚠️ Apenas metadados oficiais do TSE — resultado não inserido ainda.")
 
 st.sidebar.divider()
-st.sidebar.caption("🔒 Admin: senha 'admin123' (troque por segura)")
+st.sidebar.caption("🔒 Admin: senha configurada (secret; padrão admin123)")
 st.sidebar.caption("Metadados: PesqEle TSE 2026 (oficiais)")
 try:
     _nres = len(ids_com_resultado())
