@@ -122,6 +122,35 @@ def _premium_senha():
     import os
     return os.environ.get("PREMIUM_SENHA") or "premium123"
 
+
+def _premium_ok(senha_digitada):
+    """Valida se a senha digitada está na lista/única de assinantes."""
+    import os
+    senhas = []
+    try:
+        from streamlit import secrets as _s
+        for chave in ("PREMIUM_SENHAS", "PREMIUM_SENHA"):
+            if chave in _s:
+                v = _s[chave]
+                if isinstance(v, (list, tuple)):
+                    senhas = list(v)
+                else:
+                    senhas = [str(v)]
+                break
+    except Exception:
+        pass
+    if not senhas:
+        env = os.environ.get("PREMIUM_SENHAS") or os.environ.get("PREMIUM_SENHA")
+        if env:
+            try:
+                import json
+                senhas = json.loads(env) if env.startswith("[") else [env]
+            except Exception:
+                senhas = [env]
+    if not senhas:
+        senhas = ["premium123"]
+    return senha_digitada in senhas
+
 st.sidebar.title("🔒 Painel Admin")
 senha = st.sidebar.text_input("Senha do admin", type="password")
 ADMIN = senha == _admin_senha()
@@ -325,7 +354,7 @@ else:
     with tabPremium:
         st.subheader("💎 Área Premium — Inteligência Eleitoral")
         _senha_prem = st.text_input("Senha do assinante:", type="password", key="prem_senha")
-        if _senha_prem == _premium_senha():
+        if _premium_ok(_senha_prem):
             st.success("✅ Acesso Premium liberado")
             import matplotlib.pyplot as plt
             prem = pd.DataFrame([r for r in df_ce.to_dict("records")])
