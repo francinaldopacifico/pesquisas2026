@@ -111,6 +111,17 @@ def _admin_senha():
     import os
     return os.environ.get("ADMIN_SENHA") or "admin123"
 
+
+def _premium_senha():
+    try:
+        from streamlit import secrets as _s
+        if "PREMIUM_SENHA" in _s:
+            return _s["PREMIUM_SENHA"]
+    except Exception:
+        pass
+    import os
+    return os.environ.get("PREMIUM_SENHA") or "premium123"
+
 st.sidebar.title("🔒 Painel Admin")
 senha = st.sidebar.text_input("Senha do admin", type="password")
 ADMIN = senha == _admin_senha()
@@ -236,77 +247,132 @@ else:
         "estiver disponível, ele é exibido; caso contrário, apenas os metadados oficiais."
     )
 
-    # Foco no Ceará
-    df_ce = df_meta[df_meta["uf"] == "CE"].copy()
-    result_ids = ids_com_resultado()
+    tabPublico, tabPremium = st.tabs(["📊 Pesquisas", "💎 Premium"])
 
-    cargos_foco = ["Presidente", "Governador", "Senador", "Deputado Federal", "Deputado Estadual"]
-    aba = st.radio("Cargo:", ["Todos"] + cargos_foco, horizontal=True)
+    with tabPublico:
+        # Foco no Ceará
+        df_ce = df_meta[df_meta["uf"] == "CE"].copy()
+        result_ids = ids_com_resultado()
 
-    c1, c2 = st.columns([2, 3])
-    filtro_inst = c1.selectbox("Instituto:", ["Todos"] + sorted(df_ce["instituto"].dropna().unique().tolist()))
-    termo = c2.text_input("Busca (instituto/candidato/protocolo):")
+        cargos_foco = ["Presidente", "Governador", "Senador", "Deputado Federal", "Deputado Estadual"]
+        aba = st.radio("Cargo:", ["Todos"] + cargos_foco, horizontal=True)
 
-    df_f = df_ce
-    if aba != "Todos":
-        df_f = df_f[df_f["cargo"].astype(str).str.contains(aba, case=False, na=False)]
-    if filtro_inst != "Todos":
-        df_f = df_f[df_f["instituto"] == filtro_inst]
+        c1, c2 = st.columns([2, 3])
+        filtro_inst = c1.selectbox("Instituto:", ["Todos"] + sorted(df_ce["instituto"].dropna().unique().tolist()))
+        termo = c2.text_input("Busca (instituto/candidato/protocolo):")
 
-    # No "Todos" (sem busca/filtro), mostra só pesquisas COM resultado real
-    if aba == "Todos" and filtro_inst == "Todos" and not termo.strip():
-        df_f = df_f[df_f["pesquisa_id"].isin(result_ids)]
+        df_f = df_ce
+        if aba != "Todos":
+            df_f = df_f[df_f["cargo"].astype(str).str.contains(aba, case=False, na=False)]
+        if filtro_inst != "Todos":
+            df_f = df_f[df_f["instituto"] == filtro_inst]
+
+        # No "Todos" (sem busca/filtro), mostra só pesquisas COM resultado real
+        if aba == "Todos" and filtro_inst == "Todos" and not termo.strip():
+            df_f = df_f[df_f["pesquisa_id"].isin(result_ids)]
 
     # Busca também por candidato nos resultados salvos
-    cand_ids = set()
-    if termo.strip():
-        t = termo.strip().lower()
-        mask = (df_f["instituto"].astype(str).str.lower().str.contains(t, regex=False)
-                | df_f["protocolo"].astype(str).str.lower().str.contains(t, regex=False)
-                | df_f["cargo"].astype(str).str.lower().str.contains(t, regex=False)
-                | df_f["municipio"].astype(str).str.lower().str.contains(t, regex=False))
-        df_f = df_f[mask]
-        for pid, reg in storage.carregar_resultados_json().items():
-            for cand in (reg.get("candidatos") or {}):
-                if t in str(cand).lower():
-                    cand_ids.add(pid)
-    if cand_ids:
-        df_f = pd.concat([df_f, df_ce[df_ce['pesquisa_id'].isin(cand_ids)]]).drop_duplicates('pesquisa_id')
+        cand_ids = set()
+        if termo.strip():
+            t = termo.strip().lower()
+            mask = (df_f["instituto"].astype(str).str.lower().str.contains(t, regex=False)
+                    | df_f["protocolo"].astype(str).str.lower().str.contains(t, regex=False)
+                    | df_f["cargo"].astype(str).str.lower().str.contains(t, regex=False)
+                    | df_f["municipio"].astype(str).str.lower().str.contains(t, regex=False))
+            df_f = df_f[mask]
+            for pid, reg in storage.carregar_resultados_json().items():
+                for cand in (reg.get("candidatos") or {}):
+                    if t in str(cand).lower():
+                        cand_ids.add(pid)
+        if cand_ids:
+            df_f = pd.concat([df_f, df_ce[df_ce['pesquisa_id'].isin(cand_ids)]]).drop_duplicates('pesquisa_id')
 
-    df_f = df_f.copy()
-    df_f["_dt"] = pd.to_datetime(df_f["datas"], format="%d/%m/%Y", errors="coerce")
-    df_f = df_f.sort_values("_dt", ascending=False).drop(columns=["_dt"])
-    st.write(f"Mostrando **{len(df_f)}** pesquisa(s) no Ceará.")
+        df_f = df_f.copy()
+        df_f["_dt"] = pd.to_datetime(df_f["datas"], format="%d/%m/%Y", errors="coerce")
+        df_f = df_f.sort_values("_dt", ascending=False).drop(columns=["_dt"])
+        st.write(f"Mostrando **{len(df_f)}** pesquisa(s) no Ceará.")
 
-    for _, row in df_f.iterrows():
-        pid = row["pesquisa_id"]
-        res = carregar_resultados(pid)
-        tem_res = res is not None
-        titulo = f"📋 {row['instituto']} | {row['cargo']} | coleta até {row['datas']}"
-        if tem_res:
-            titulo = "📊 " + titulo
-        with st.expander(titulo, expanded=tem_res):
-            col1, col2, col3, col4 = st.columns(4)
-            with col1: st.metric("Instituto", row["instituto"])
-            with col2: st.metric("Cargo", row["cargo"])
-            with col3: st.metric("Término coleta", row["datas"])
-            with col4: st.metric("Amostra", f"{row['amostra']:,}".replace(",", "."))
-            if res is not None:
-                st.success("📊 Resultado disponível")
-                cand = res["candidatos"]
-                if cand.empty:
-                    st.warning("Sem candidatos salvos.")
+        for _, row in df_f.iterrows():
+            pid = row["pesquisa_id"]
+            res = carregar_resultados(pid)
+            tem_res = res is not None
+            titulo = f"📋 {row['instituto']} | {row['cargo']} | coleta até {row['datas']}"
+            if tem_res:
+                titulo = "📊 " + titulo
+            with st.expander(titulo, expanded=tem_res):
+                col1, col2, col3, col4 = st.columns(4)
+                with col1: st.metric("Instituto", row["instituto"])
+                with col2: st.metric("Cargo", row["cargo"])
+                with col3: st.metric("Término coleta", row["datas"])
+                with col4: st.metric("Amostra", f"{row['amostra']:,}".replace(",", "."))
+                if res is not None:
+                    st.success("📊 Resultado disponível")
+                    cand = res["candidatos"]
+                    if cand.empty:
+                        st.warning("Sem candidatos salvos.")
+                    else:
+                        df_tab = cand.copy()
+                        df_tab = df_tab.reset_index(drop=True)
+                        df_tab.columns = ["Candidato", "%"]
+                        df_tab["%"] = df_tab["%"].astype(float).map(lambda v: f"{v:.1f}".replace(".", ","))
+                        st.table(df_tab.style.hide(axis="index"))
+                    fonte = res["metadados"]["fonte_manual"]
+                    if fonte:
+                        st.caption(f"Fonte dos resultados: {fonte}")
                 else:
-                    df_tab = cand.copy()
-                    df_tab = df_tab.reset_index(drop=True)
-                    df_tab.columns = ["Candidato", "%"]
-                    df_tab["%"] = df_tab["%"].astype(float).map(lambda v: f"{v:.1f}".replace(".", ","))
-                    st.table(df_tab.style.hide(axis="index"))
-                fonte = res["metadados"]["fonte_manual"]
-                if fonte:
-                    st.caption(f"Fonte dos resultados: {fonte}")
+                    st.warning("⚠️ Apenas metadados oficiais do TSE — resultado não inserido ainda.")
+
+    with tabPremium:
+        st.subheader("💎 Área Premium — Inteligência Eleitoral")
+        _senha_prem = st.text_input("Senha do assinante:", type="password", key="prem_senha")
+        if _senha_prem == _premium_senha():
+            st.success("✅ Acesso Premium liberado")
+            import matplotlib.pyplot as plt
+            prem = pd.DataFrame([r for r in df_ce.to_dict("records")])
+            dados_res = storage.carregar_resultados_json()
+            # Monta série temporal de Ciro e Elmano
+            linhas = []
+            for pid, reg in dados_res.items():
+                if reg.get("uf") != "CE":
+                    continue
+                cands = reg.get("candidatos", {})
+                ci = None; el = None
+                for nome, v in cands.items():
+                    if "ciro" in str(nome).lower() or "elmano" in str(nome).lower():
+                        if "ciro" in str(nome).lower(): ci = v
+                        else: el = v
+                if ci is not None or el is not None:
+                    linhas.append({"pesquisa": pid, "instituto": reg.get("instituto",""),
+                                   "data": reg.get("data_pesquisa",""), "Ciro": ci, "Elmano": el})
+            if linhas:
+                s = pd.DataFrame(linhas)
+                s["data"] = pd.to_datetime(s["data"], format="%d/%m/%Y", errors="coerce")
+                s = s.sort_values("data")
+                opcoes = sorted(s["instituto"].unique())
+                inst = st.selectbox("Instituto (evolução):", opcoes)
+                sub = s[s["instituto"] == inst]
+                if not sub.empty:
+                    fig, ax = plt.subplots(figsize=(8, 4))
+                    ax.plot(sub["data"], sub["Ciro"], marker="o", label="Ciro")
+                    ax.plot(sub["data"], sub["Elmano"], marker="o", label="Elmano")
+                    ax.set_ylabel("%")
+                    ax.set_title(f"Evolução Ciro x Elmano — {inst}")
+                    ax.legend()
+                    ax.grid(True, alpha=0.3)
+                    st.pyplot(fig)
+                else:
+                    st.info("Sem série temporal para este instituto.")
             else:
-                st.warning("⚠️ Apenas metadados oficiais do TSE — resultado não inserido ainda.")
+                st.info("Ainda sem dados para gerar a série temporal.")
+        else:
+            st.markdown(
+                "🔒 **Central do Assinante**\n\n"
+                "Com a assinatura Premium você tem acesso a **análises exclusivas**:\n"
+                "- 📈 Gráfico de evolução de intenção de voto (Ciro x Elmano) por instituto\n"
+                "- 🔍 Séries históricas completas\n"
+                "- 📊 Relatórios detalhados\n\n"
+                "**Para contratar, fale com o comercial.**"
+            )
 
 st.sidebar.divider()
 st.sidebar.caption("🔒 Admin: senha configurada (secret; padrão admin123)")
