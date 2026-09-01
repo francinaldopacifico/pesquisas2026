@@ -328,27 +328,16 @@ else:
             tem_res = res is not None
             titulo = f"📋 {row['instituto']} | {row['cargo']} | coleta até {row['datas']}"
             if tem_res:
-                titulo = "📊 " + titulo
-            with st.expander(titulo, expanded=tem_res):
+                titulo = "🔒 " + titulo
+            with st.expander(titulo, expanded=False):
                 col1, col2, col3, col4 = st.columns(4)
                 with col1: st.metric("Instituto", row["instituto"])
                 with col2: st.metric("Cargo", row["cargo"])
                 with col3: st.metric("Término coleta", row["datas"])
                 with col4: st.metric("Amostra", f"{row['amostra']:,}".replace(",", "."))
                 if res is not None:
-                    st.success("📊 Resultado disponível")
-                    cand = res["candidatos"]
-                    if cand.empty:
-                        st.warning("Sem candidatos salvos.")
-                    else:
-                        df_tab = cand.copy()
-                        df_tab = df_tab.reset_index(drop=True)
-                        df_tab.columns = ["Candidato", "%"]
-                        df_tab["%"] = df_tab["%"].astype(float).map(lambda v: f"{v:.1f}".replace(".", ","))
-                        st.table(df_tab.style.hide(axis="index"))
-                    fonte = res["metadados"]["fonte_manual"]
-                    if fonte:
-                        st.caption(f"Fonte dos resultados: {fonte}")
+                    st.warning("🔒 **Resultados por candidato disponíveis apenas no Premium.** "
+                               "Assine para ver os percentuais.")
                 else:
                     st.warning("⚠️ Apenas metadados oficiais do TSE — resultado não inserido ainda.")
 
@@ -392,14 +381,44 @@ else:
                     st.pyplot(fig)
                 else:
                     st.info("Sem série temporal para este instituto.")
+
+            st.divider()
+            st.subheader("📊 Percentuais completos por pesquisa")
+            dados_res = storage.carregar_resultados_json()
+            linhas_tab = []
+            for pid, reg in dados_res.items():
+                if reg.get("uf") != "CE":
+                    continue
+                for cand_nome, v in reg.get("candidatos", {}).items():
+                    linhas_tab.append({
+                        "Pesquisa": pid,
+                        "Instituto": reg.get("instituto", ""),
+                        "Data": reg.get("data_pesquisa", ""),
+                        "Candidato": cand_nome,
+                        "%": v
+                    })
+            if linhas_tab:
+                df_prem = pd.DataFrame(linhas_tab)
+                df_prem["%"] = df_prem["%"].astype(float).map(lambda x: f"{x:.1f}".replace(".", ","))
+                st.dataframe(df_prem, use_container_width=True, hide_index=True)
             else:
-                st.info("Ainda sem dados para gerar a série temporal.")
+                st.info("Sem dados de percentuais.")
+
+            st.divider()
+            st.subheader("🗳️ Eleições 2026 — Perfil do Eleitorado (Premium)")
+            st.markdown(
+                "Acesse o dashboard completo do eleitorado: **5.757 municípios**, "
+                "total Brasil, e perfil por cidade (gênero, faixa etária, escolaridade)."
+            )
+            url_eleicoes = "https://eleicoes2026.streamlit.app"
+            st.link_button("🌐 Abrir Eleições 2026 (perfil do eleitorado)", url_eleicoes)
         else:
             st.markdown(
                 "🔒 **Central do Assinante**\n\n"
                 "Com a assinatura Premium você tem acesso a **análises exclusivas**:\n"
                 "- 📈 Gráfico de evolução de intenção de voto (Ciro x Elmano) por instituto\n"
-                "- 🔍 Séries históricas completas\n"
-                "- 📊 Relatórios detalhados\n\n"
+                "- 📊 Percentuais completos de todas as pesquisas\n"
+                "- 🗳️ Dashboard Eleições 2026 (perfil do eleitorado)\n"
+                "- 🔍 Relatórios detalhados\n\n"
                 "**Para contratar, fale com o comercial.**"
             )
