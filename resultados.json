@@ -8,5 +8,23 @@
     "candidatos": {
       "elmano de freitas": 0.0
     }
+  },
+  "CE056822026": {
+    "instituto": "REAL TIME MIDIA LTDA",
+    "cargo": "Governador, Senador",
+    "data_pesquisa": "13/07/2026",
+    "uf": "CE",
+    "fonte_manual": "",
+    "candidatos": {
+      "Elmano de Freitas": 0.0,
+      "Capitão Wagner": 0.0,
+      "Eugênio Ronaldo": 0.0,
+      "Suname do Belém": 0.0,
+      "Roberto Cláudio": 0.0,
+      "Chico Lopes": 0.0,
+      "Cid Gomes": 0.0,
+      "Camilo Santana": 0.0,
+      "Roberto Pessoa": 0.0
+    }
   }
 }
