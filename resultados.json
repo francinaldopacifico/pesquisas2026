@@ -26,5 +26,21 @@
       "Camilo Santana": 0.0,
       "Roberto Pessoa": 0.0
     }
+  },
+  "CE082232026": {
+    "instituto": "REAL TIME MIDIA LTDA",
+    "cargo": "Governador, Senador",
+    "data_pesquisa": "15/08/2026",
+    "uf": "CE",
+    "fonte_manual": "RealTime Big Data — UOL (20/08/2026)",
+    "candidatos": {
+      "Elmano de Freitas": 44.0,
+      "Ciro Gomes": 44.0,
+      "Vera Lúcia": 1.0,
+      "Delegado Huggo": 1.0,
+      "Outros": 1.0,
+      "Nulo/Branco": 4.0,
+      "Não sabe/Não respondeu": 5.0
+    }
   }
 }
