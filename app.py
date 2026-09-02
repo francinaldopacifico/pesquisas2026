@@ -411,19 +411,30 @@ else:
             tem_res = res is not None
             titulo = f"📋 {row['instituto']} | {row['cargo']} | coleta até {row['datas']}"
             if tem_res:
-                titulo = "🔒 " + titulo
+                titulo = "📊 " + titulo
             st.markdown(f"""
             <div style="background:{cor};border-radius:14px;padding:2px;margin:0 0 -18px 0;"></div>
             """, unsafe_allow_html=True)
-            with st.expander(titulo, expanded=False):
+            with st.expander(titulo, expanded=tem_res):
                 col1, col2, col3, col4 = st.columns(4)
                 with col1: st.metric("Instituto", row["instituto"])
                 with col2: st.metric("Cargo", row["cargo"])
                 with col3: st.metric("Término coleta", row["datas"])
                 with col4: st.metric("Amostra", f"{row['amostra']:,}".replace(",", "."))
                 if res is not None:
-                    st.warning("🔒 **Resultados por candidato disponíveis apenas no Premium.** "
-                               "Assine para ver os percentuais.")
+                    st.success("📊 Resultado disponível")
+                    cand = res["candidatos"]
+                    if cand.empty:
+                        st.warning("Sem candidatos salvos.")
+                    else:
+                        df_tab = cand.copy()
+                        df_tab = df_tab.reset_index(drop=True)
+                        df_tab.columns = ["Candidato", "%"]
+                        df_tab["%"] = df_tab["%"].astype(float).map(lambda v: f"{v:.1f}".replace(".", ","))
+                        st.table(df_tab.style.hide(axis="index"))
+                    fonte = res["metadados"]["fonte_manual"]
+                    if fonte:
+                        st.caption(f"Fonte dos resultados: {fonte}")
                 else:
                     st.warning("⚠️ Apenas metadados oficiais do TSE — resultado não inserido ainda.")
 
