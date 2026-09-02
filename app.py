@@ -5,6 +5,58 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 from datetime import datetime
 
+# --- 0. CSS GLOBAL (interface colorida) ---
+st.markdown("""
+<style>
+:root {
+  --azul: #1E90FF; --azul-escuro: #0B4F9E; --verde: #28A745; --laranja: #FF7F11;
+  --roxo: #7B2FF7; --rosa: #FF4D8D; --dourado: #FFD700;
+}
+.stApp {
+  background: linear-gradient(135deg, #eef6ff 0%, #fdf0ff 40%, #fff8e6 100%);
+  font-family: 'Segoe UI', sans-serif;
+}
+h1, h2, h3 {
+  color: var(--azul-escuro) !important;
+  font-weight: 800 !important;
+}
+/* Botões */
+.stButton > button {
+  background: linear-gradient(90deg, var(--azul), var(--roxo));
+  color: white !important; font-weight: 700; border-radius: 12px;
+  border: none; padding: 8px 22px;
+}
+.stButton > button:hover { filter: brightness(1.1); }
+/* Link button premium */
+.stLinkButton > a {
+  background: linear-gradient(90deg, var(--dourado), var(--laranja));
+  color: #3c2f00 !important; font-weight: 800; border-radius: 12px;
+}
+/* Radio e selects coloridos */
+.stRadio [role="radiogroup"] label { color: #0B4F9E; font-weight: 600; }
+/* Tabs mais vivas */
+.stTabs [data-baseweb="tab-list"] { gap: 8px; }
+.stTabs [data-baseweb="tab"] {
+  border-radius: 12px; padding: 8px 18px; font-weight: 700;
+  background: #e3f0ff; color: #0B4F9E;
+}
+.stTabs [aria-selected="true"] {
+  background: linear-gradient(90deg, var(--azul), var(--roxo)) !important;
+  color: white !important;
+}
+/* Expander: fundo suave */
+.stExpander {
+  border-radius: 14px !important; overflow: hidden;
+  border: 1px solid #d0e4ff !important;
+}
+/* Metrics */
+[data-testid="stMetric"] {
+  background: white; border-radius: 14px; padding: 10px;
+  border: 1px solid #d8e6ff; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+</style>
+""", unsafe_allow_html=True)
+
 # --- 1. SETUP DO BANCO ---
 DB_PATH = Path(__file__).parent / "pesquisas.db"
 
@@ -347,13 +399,22 @@ else:
         df_f = df_f.sort_values("_dt", ascending=False).drop(columns=["_dt"])
         st.write(f"Mostrando **{len(df_f)}** pesquisa(s) no Ceará.")
 
-        for _, row in df_f.iterrows():
+        # Cores alternadas para cada pesquisa
+        cores_linha = [
+            "linear-gradient(90deg,#e0f2ff,#ffe8f7)",
+            "linear-gradient(90deg,#e6ffe6,#fff4d6)",
+        ]
+        for idx, (_, row) in enumerate(df_f.iterrows()):
+            cor = cores_linha[idx % 2]
             pid = row["pesquisa_id"]
             res = carregar_resultados(pid)
             tem_res = res is not None
             titulo = f"📋 {row['instituto']} | {row['cargo']} | coleta até {row['datas']}"
             if tem_res:
                 titulo = "🔒 " + titulo
+            st.markdown(f"""
+            <div style="background:{cor};border-radius:14px;padding:2px;margin:0 0 -18px 0;"></div>
+            """, unsafe_allow_html=True)
             with st.expander(titulo, expanded=False):
                 col1, col2, col3, col4 = st.columns(4)
                 with col1: st.metric("Instituto", row["instituto"])
