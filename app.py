@@ -459,7 +459,12 @@ else:
             pid = row["pesquisa_id"]
             res = carregar_resultados(pid)
             tem_res = res is not None
-            titulo = f"📋 {row['instituto']} | {row['cargo']} | coleta até {row['datas']}"
+            cargo_txt = row["cargo"] if row["cargo"] else ""
+            if aba == "GovSen":
+                cargo_txt = "Governador/Senador"
+            elif aba:
+                cargo_txt = aba
+            titulo = f"📋 {row['instituto']} | {cargo_txt} | coleta até {row['datas']}"
             if tem_res:
                 titulo = "📊 " + titulo
             st.markdown(f"""
@@ -468,7 +473,7 @@ else:
             with st.expander(titulo, expanded=tem_res):
                 col1, col2, col3, col4 = st.columns(4)
                 with col1: st.metric("Instituto", row["instituto"])
-                with col2: st.metric("Cargo", row["cargo"])
+                with col2: st.metric("Cargo", cargo_txt)
                 with col3: st.metric("Término coleta", row["datas"])
                 with col4: st.metric("Amostra", f"{row['amostra']:,}".replace(",", "."))
                 if res is not None:
