@@ -366,6 +366,7 @@ else:
         "todos os cargos das Eleições 2026. Quando o resultado por candidato "
         "estiver disponível, ele é exibido; caso contrário, apenas os metadados oficiais."
     )
+    st.caption("🔄 versão 3 — filtro por cargo corrigido")
 
     # --- ALERTA SEJA PREMIUM (aparece ao abrir o app) ---
     if "alerta_premium_fechado" not in st.session_state:
