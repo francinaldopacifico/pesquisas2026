@@ -404,6 +404,7 @@ else:
             "Cargo:",
             ["Governador/Senador", "Deputado Estadual", "Deputado Federal"],
             horizontal=True,
+            index=None,
             label_visibility="collapsed",
         )
         if "cargo_filtro" in st.session_state:
@@ -414,7 +415,9 @@ else:
         termo = c2.text_input("Busca (candidato/protocolo):")
 
         df_f = df_ce
-        if aba == "Governador/Senador":
+        if aba is None:
+            df_f = df_f.iloc[0:0].copy()
+        elif aba == "Governador/Senador":
             df_f = df_f[df_f["cargo"].astype(str).str.contains("Governador", case=False, na=False)]
         elif aba in ("Deputado Estadual", "Deputado Federal"):
             df_f = df_f[df_f["cargo"].astype(str).str.contains(aba, case=False, na=False)]
@@ -440,9 +443,12 @@ else:
         df_f = df_f.copy()
         df_f["_dt"] = pd.to_datetime(df_f["datas"], format="%d/%m/%Y", errors="coerce")
         df_f = df_f.sort_values("_dt", ascending=False).drop(columns=["_dt"])
-        st.write(f"Mostrando **{len(df_f)}** pesquisa(s) no Ceará.")
-        if df_f.empty and aba:
+        if aba is None:
+            st.info("👆 **Selecione um cargo acima** para ver as pesquisas.")
+        elif df_f.empty:
             st.info("📭 **Ainda não tem pesquisas** publicadas para este cargo. Volte em breve!")
+        else:
+            st.write(f"Mostrando **{len(df_f)}** pesquisa(s) no Ceará.")
 
         # Cores alternadas para cada pesquisa
         cores_linha = [
