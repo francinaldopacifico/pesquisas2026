@@ -400,29 +400,24 @@ else:
         result_ids = ids_com_resultado()
 
         st.markdown("**🗂️ Selecione o cargo:**")
-        b1, b2, b3 = st.columns(3)
-        if b1.button("🏛️ Governador/Senador", key="b_govsen", type="primary"):
-            st.session_state["cargo_filtro"] = "GovSen"
-        if b2.button("🏛️ Dep. Estadual", key="b_depest"):
-            st.session_state["cargo_filtro"] = "Deputado Estadual"
-        if b3.button("🏛️ Dep. Federal", key="b_depfed"):
-            st.session_state["cargo_filtro"] = "Deputado Federal"
-        aba = st.session_state.get("cargo_filtro", "")
+        aba = st.radio(
+            "Cargo:",
+            ["Governador/Senador", "Deputado Estadual", "Deputado Federal"],
+            horizontal=True,
+            label_visibility="collapsed",
+        )
+        if "cargo_filtro" in st.session_state:
+            del st.session_state["cargo_filtro"]
 
         c1, c2 = st.columns([2, 3])
         filtro_inst = c1.selectbox("Instituto:", ["Todos"] + sorted(df_ce["instituto"].dropna().unique().tolist()))
         termo = c2.text_input("Busca (candidato/protocolo):")
 
         df_f = df_ce
-        if aba:
-            if aba == "GovSen":
-                df_f = df_f[df_f["cargo"].astype(str).str.contains("Governador", case=False, na=False)
-                             | df_f["cargo"].astype(str).str.contains("Senador", case=False, na=False)]
-            else:
-                df_f = df_f[df_f["cargo"].astype(str).str.contains(aba, case=False, na=False)]
-        else:
-            # Nenhum botão selecionado -> vazio
-            df_f = df_f.iloc[0:0].copy()
+        if aba == "Governador/Senador":
+            df_f = df_f[df_f["cargo"].astype(str).str.contains("Governador", case=False, na=False)]
+        elif aba in ("Deputado Estadual", "Deputado Federal"):
+            df_f = df_f[df_f["cargo"].astype(str).str.contains(aba, case=False, na=False)]
         if filtro_inst != "Todos":
             df_f = df_f[df_f["instituto"] == filtro_inst]
 
@@ -460,7 +455,7 @@ else:
             res = carregar_resultados(pid)
             tem_res = res is not None
             cargo_txt = row["cargo"] if row["cargo"] else ""
-            if aba == "GovSen":
+            if aba == "Governador/Senador":
                 cargo_txt = "Governador/Senador"
             elif aba:
                 cargo_txt = aba
