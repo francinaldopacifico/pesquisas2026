@@ -304,5 +304,24 @@
       "Outros": 1.0,
       "Indecisos/Branco": 15.0
     }
+  },
+  "CE041222026": {
+    "instituto": "DATAFOLHA INSTITUTO DE PESQUISAS LTDA.",
+    "cargo": "Governador, Senador",
+    "data_pesquisa": "31/08/2026",
+    "uf": "CE",
+    "fonte_manual": "Datafolha/O Povo — CNN Brasil (03/09/2026)",
+    "candidatos": {
+      "Ciro Gomes": 46.0,
+      "Elmano de Freitas": 37.0,
+      "Vera Lúcia": 1.0,
+      "Danilo Soares": 1.0,
+      "Serley Leal": 1.0,
+      "Delegado Huggo": 0.0,
+      "Zé Batista": 0.0,
+      "Ieri Braga": 0.0,
+      "Branco/Nulo": 5.0,
+      "Indecisos": 5.0
+    }
   }
 }
