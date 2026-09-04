@@ -400,27 +400,26 @@ else:
         result_ids = ids_com_resultado()
 
         st.markdown("**🗂️ Selecione o cargo:**")
-        b1, b2, b3, b4 = st.columns(4)
-        sel_cargo = None
-        if b1.button("🏛️ Governador", key="b_gov"):
-            sel_cargo = "Governador"
-        if b2.button("🏛️ Senador", key="b_sen"):
-            sel_cargo = "Senador"
-        if b3.button("🏛️ Dep. Estadual", key="b_depest"):
-            sel_cargo = "Deputado Estadual"
-        if b4.button("🏛️ Dep. Federal", key="b_depfed"):
-            sel_cargo = "Deputado Federal"
-        if sel_cargo is not None:
-            st.session_state["cargo_filtro"] = sel_cargo
+        b1, b2, b3 = st.columns(3)
+        if b1.button("🏛️ Governador/Senador", key="b_govsen", type="primary"):
+            st.session_state["cargo_filtro"] = "GovSen"
+        if b2.button("🏛️ Dep. Estadual", key="b_depest"):
+            st.session_state["cargo_filtro"] = "Deputado Estadual"
+        if b3.button("🏛️ Dep. Federal", key="b_depfed"):
+            st.session_state["cargo_filtro"] = "Deputado Federal"
         aba = st.session_state.get("cargo_filtro", "")
 
         c1, c2 = st.columns([2, 3])
         filtro_inst = c1.selectbox("Instituto:", ["Todos"] + sorted(df_ce["instituto"].dropna().unique().tolist()))
-        termo = c2.text_input("Busca (instituto/candidato/protocolo):")
+        termo = c2.text_input("Busca (candidato/protocolo):")
 
         df_f = df_ce
         if aba:
-            df_f = df_f[df_f["cargo"].astype(str).str.contains(aba, case=False, na=False)]
+            if aba == "GovSen":
+                df_f = df_f[df_f["cargo"].astype(str).str.contains("Governador", case=False, na=False)
+                             | df_f["cargo"].astype(str).str.contains("Senador", case=False, na=False)]
+            else:
+                df_f = df_f[df_f["cargo"].astype(str).str.contains(aba, case=False, na=False)]
         else:
             # Nenhum botão selecionado -> vazio
             df_f = df_f.iloc[0:0].copy()
@@ -447,6 +446,8 @@ else:
         df_f["_dt"] = pd.to_datetime(df_f["datas"], format="%d/%m/%Y", errors="coerce")
         df_f = df_f.sort_values("_dt", ascending=False).drop(columns=["_dt"])
         st.write(f"Mostrando **{len(df_f)}** pesquisa(s) no Ceará.")
+        if df_f.empty and aba:
+            st.info("📭 **Ainda não tem pesquisas** publicadas para este cargo. Volte em breve!")
 
         # Cores alternadas para cada pesquisa
         cores_linha = [
