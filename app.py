@@ -102,9 +102,10 @@ def carregar_metadados():
 # --- 3. FUNÇÕES DE RESULTADOS (persistência via GitHub JSON) ---
 import storage
 
-def salvar_resultado(pesquisa_id, instituto, cargo, data_pesquisa, uf, fonte, candidatos):
+def salvar_resultado(pesquisa_id, instituto, cargo, data_pesquisa, uf, fonte, candidatos, senado=None):
     dados = storage.carregar_resultados_json()
-    dados[pesquisa_id] = {
+    prev = dados.get(pesquisa_id, {})
+    datos = {
         "instituto": instituto,
         "cargo": cargo,
         "data_pesquisa": data_pesquisa,
@@ -112,6 +113,14 @@ def salvar_resultado(pesquisa_id, instituto, cargo, data_pesquisa, uf, fonte, ca
         "fonte_manual": fonte or "",
         "candidatos": {cand: float(pct) for cand, pct in candidatos},
     }
+    if senado is not None:
+        datos["senado"] = {cand: float(pct) for cand, pct in senado}
+    elif "senado" in prev:
+        datos["senado"] = prev["senado"]
+    datos["senado"] = datos.get("senado")
+    if datos["senado"] is None:
+        datos.pop("senado", None)
+    dados[pesquisa_id] = datos
     return storage.salvar_resultados_json(dados)
 
 def carregar_resultados(pesquisa_id):
@@ -119,10 +128,11 @@ def carregar_resultados(pesquisa_id):
     reg = dados.get(pesquisa_id)
     if not reg:
         return None
-    cands = reg.get("candidatos", {})
-    df_cand = pd.DataFrame(
-        [{"candidato": k, "percentual": v} for k, v in cands.items()]
-    ).sort_values("percentual", ascending=False) if cands else pd.DataFrame(columns=["candidato", "percentual"])
+    def _df(cands):
+        if not cands:
+            return pd.DataFrame(columns=["candidato", "percentual"])
+        return pd.DataFrame([{"candidato": k, "percentual": v} for k, v in cands.items()]
+                            ).sort_values("percentual", ascending=False)
     return {
         "metadados": pd.Series({
             "instituto": reg.get("instituto", ""),
@@ -131,7 +141,8 @@ def carregar_resultados(pesquisa_id):
             "uf": reg.get("uf", ""),
             "fonte_manual": reg.get("fonte_manual", ""),
         }),
-        "candidatos": df_cand,
+        "candidatos": _df(reg.get("candidatos", {})),
+        "senado": _df(reg.get("senado", {})),
     }
 
 def deletar_resultado(pesquisa_id):
@@ -287,13 +298,40 @@ Para **ver no público**: apague a senha no menu lateral — a pesquisa com resu
             elif total > 100.1:
                 st.error(f"⚠️ Soma {total:.1f}% — deve ser ≤ 100%")
             else:
+                # ---- Bloco Senado (opcional) ----
+                senado = None
+                with st.expander("🏛️ Editar Senado (opcional)"):
+                    sen_prev = None
+                    if dados_existentes is not None and "senado" in dados_existentes and not dados_existentes["senado"].empty:
+                        df_sen_prev = dados_existentes["senado"]
+                        sen_prev = dict(zip(df_sen_prev["candidato"], df_sen_prev["percentual"]))
+                    sen_n = st.number_input("Nº candidatos Senado", min_value=1, max_value=15,
+                                            value=(len(sen_prev) if sen_prev is not None else 4), step=1,
+                                            key=f"nsen_{opcao}")
+                    sen_lista = []
+                    sen_total = 0.0
+                    for i in range(int(sen_n)):
+                        sc1, sc2 = st.columns([3, 1])
+                        snome = (list(sen_prev.keys())[i] if sen_prev and i < len(sen_prev) else "")
+                        spct = (list(sen_prev.values())[i] if sen_prev and i < len(sen_prev) else 0.0)
+                        sc = sc1.text_input(f"Senador {i+1}", value=snome, key=f"sc_{opcao}_{i}")
+                        sp = sc2.number_input(f"%", min_value=0.0, max_value=100.0, value=float(spct),
+                                              step=0.1, key=f"sp_{opcao}_{i}")
+                        if sc.strip():
+                            sen_lista.append((sc.strip(), sp))
+                            sen_total += sp
+                    if sen_lista:
+                        if sen_total > 100.1:
+                            st.error(f"⚠️ Soma Senado {sen_total:.1f}% — deve ser ≤ 100%")
+                        else:
+                            senado = sen_lista
                 fonte = st.text_input("Fonte manual (ex: Folha de S.Paulo, g1)",
                                       value=(dados_existentes['metadados']['fonte_manual'] or "")
                                       if dados_existentes else "")
                 if st.button("💾 Salvar Resultado"):
                     try:
                         ok = salvar_resultado(opcao, meta['instituto'], meta['cargo'], meta['datas'],
-                                              meta['uf'], fonte, candidatos)
+                                              meta['uf'], fonte, candidatos, senado)
                         if ok:
                             st.success("✅ Resultado salvo no GitHub!")
                             st.toast("Salvo com sucesso!")
@@ -361,22 +399,33 @@ else:
         df_ce = df_meta[df_meta["uf"] == "CE"].copy()
         result_ids = ids_com_resultado()
 
-        cargos_foco = ["Presidente", "Governador", "Senador", "Deputado Federal", "Deputado Estadual"]
-        aba = st.radio("Cargo:", ["Todos"] + cargos_foco, horizontal=True)
+        st.markdown("**🗂️ Selecione o cargo:**")
+        b1, b2, b3, b4 = st.columns(4)
+        sel_cargo = None
+        if b1.button("🏛️ Governador", key="b_gov"):
+            sel_cargo = "Governador"
+        if b2.button("🏛️ Senador", key="b_sen"):
+            sel_cargo = "Senador"
+        if b3.button("🏛️ Dep. Estadual", key="b_depest"):
+            sel_cargo = "Deputado Estadual"
+        if b4.button("🏛️ Dep. Federal", key="b_depfed"):
+            sel_cargo = "Deputado Federal"
+        if sel_cargo is not None:
+            st.session_state["cargo_filtro"] = sel_cargo
+        aba = st.session_state.get("cargo_filtro", "")
 
         c1, c2 = st.columns([2, 3])
         filtro_inst = c1.selectbox("Instituto:", ["Todos"] + sorted(df_ce["instituto"].dropna().unique().tolist()))
         termo = c2.text_input("Busca (instituto/candidato/protocolo):")
 
         df_f = df_ce
-        if aba != "Todos":
+        if aba:
             df_f = df_f[df_f["cargo"].astype(str).str.contains(aba, case=False, na=False)]
+        else:
+            # Nenhum botão selecionado -> vazio
+            df_f = df_f.iloc[0:0].copy()
         if filtro_inst != "Todos":
             df_f = df_f[df_f["instituto"] == filtro_inst]
-
-        # No "Todos" (sem busca/filtro), mostra só pesquisas COM resultado real
-        if aba == "Todos" and filtro_inst == "Todos" and not termo.strip():
-            df_f = df_f[df_f["pesquisa_id"].isin(result_ids)]
 
     # Busca também por candidato nos resultados salvos
         cand_ids = set()
@@ -427,11 +476,19 @@ else:
                     if cand.empty:
                         st.warning("Sem candidatos salvos.")
                     else:
+                        st.markdown("**🏛️ Governador**")
                         df_tab = cand.copy()
                         df_tab = df_tab.reset_index(drop=True)
                         df_tab.columns = ["Candidato", "%"]
                         df_tab["%"] = df_tab["%"].astype(float).map(lambda v: f"{v:.1f}".replace(".", ","))
                         st.table(df_tab.style.hide(axis="index"))
+                    sen = res.get("senado")
+                    if sen is not None and not sen.empty:
+                        st.markdown("**🏛️ Senado**")
+                        df_sen = sen.copy().reset_index(drop=True)
+                        df_sen.columns = ["Candidato", "%"]
+                        df_sen["%"] = df_sen["%"].astype(float).map(lambda v: f"{v:.1f}".replace(".", ","))
+                        st.table(df_sen.style.hide(axis="index"))
                     fonte = res["metadados"]["fonte_manual"]
                     if fonte:
                         st.caption(f"Fonte dos resultados: {fonte}")
