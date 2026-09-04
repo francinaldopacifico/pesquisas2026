@@ -366,7 +366,6 @@ else:
         "todos os cargos das Eleições 2026. Quando o resultado por candidato "
         "estiver disponível, ele é exibido; caso contrário, apenas os metadados oficiais."
     )
-    st.caption("🔄 versão 3 — filtro por cargo corrigido")
 
     # --- ALERTA SEJA PREMIUM (aparece ao abrir o app) ---
     if "alerta_premium_fechado" not in st.session_state:
@@ -418,10 +417,10 @@ else:
         df_f = df_ce
         if aba is None:
             df_f = df_f.iloc[0:0].copy()
+        elif aba in ("Deputado Estadual", "Deputado Federal"):
+            df_f = df_f.iloc[0:0].copy()
         elif aba == "Governador/Senador":
             df_f = df_f[df_f["cargo"].astype(str).str.contains("Governador", case=False, na=False)]
-        elif aba in ("Deputado Estadual", "Deputado Federal"):
-            df_f = df_f[df_f["cargo"].astype(str).str.contains(aba, case=False, na=False)]
         if filtro_inst != "Todos":
             df_f = df_f[df_f["instituto"] == filtro_inst]
 
@@ -446,6 +445,8 @@ else:
         df_f = df_f.sort_values("_dt", ascending=False).drop(columns=["_dt"])
         if aba is None:
             st.info("👆 **Selecione um cargo acima** para ver as pesquisas.")
+        elif aba in ("Deputado Estadual", "Deputado Federal"):
+            st.info("📭 **Ainda não tem pesquisas de Deputados** com resultados publicados. Volte em breve!")
         elif df_f.empty:
             st.info("📭 **Ainda não tem pesquisas** publicadas para este cargo. Volte em breve!")
         else:
@@ -481,7 +482,11 @@ else:
                 if res is not None:
                     st.success("📊 Resultado disponível")
                     cand = res["candidatos"]
-                    if cand.empty:
+                    eh_dep = aba in ("Deputado Estadual", "Deputado Federal")
+                    if eh_dep:
+                        st.info("📭 **Ainda não tem pesquisas de Deputados com resultados.** "
+                                "Quando houver, aparecerão aqui.")
+                    elif cand.empty:
                         st.warning("Sem candidatos salvos.")
                     else:
                         st.markdown("**🏛️ Governador**")
@@ -491,7 +496,7 @@ else:
                         df_tab["%"] = df_tab["%"].astype(float).map(lambda v: f"{v:.1f}".replace(".", ","))
                         st.table(df_tab.style.hide(axis="index"))
                     sen = res.get("senado")
-                    if sen is not None and not sen.empty:
+                    if sen is not None and not sen.empty and not eh_dep:
                         st.markdown("**🏛️ Senado**")
                         df_sen = sen.copy().reset_index(drop=True)
                         df_sen.columns = ["Candidato", "%"]
