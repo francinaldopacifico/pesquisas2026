@@ -40,8 +40,14 @@ h1, h2, h3 {
   border-radius: 12px; padding: 8px 18px; font-weight: 700;
   background: #e3f0ff; color: #0B4F9E;
 }
-.stTabs [aria-selected="true"] {
-  background: linear-gradient(90deg, var(--azul), var(--roxo)) !important;
+/* Aba 1 (Pesquisas) selecionada -> verde escuro */
+.stTabs [data-baseweb="tab"][aria-selected="true"]:nth-of-type(1) {
+  background: #1B5E20 !important;
+  color: white !important;
+}
+/* Aba 2 (Premium) selecionada -> azul */
+.stTabs [data-baseweb="tab"][aria-selected="true"]:nth-of-type(2) {
+  background: #0B4F9E !important;
   color: white !important;
 }
 /* Expander: fundo suave */
